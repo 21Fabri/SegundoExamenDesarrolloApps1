@@ -14,7 +14,8 @@ class ProgramaModel(app: Application, private val estado: SavedStateHandle) : An
     val charlas = repo.programa.stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())
     val dia = estado.getStateFlow("dia", 0)
     val tema = estado.getStateFlow("tema", "Todos")
-    val aviso = MutableStateFlow("")
+    val fallo = MutableStateFlow(false)
+    val huboDescarga = MutableStateFlow(repo.huboDescarga)
     val cargando = MutableStateFlow(false)
 
     init { recargar() }
@@ -26,12 +27,13 @@ class ProgramaModel(app: Application, private val estado: SavedStateHandle) : An
     fun recargar() {
         if (cargando.value) return
         cargando.value = true
-        aviso.value = ""
         viewModelScope.launch {
             try {
                 repo.sincronizar()
+                huboDescarga.value = true
+                fallo.value = false
             } catch (e: IOException) {
-                aviso.value = "No se pudo consultar el programa"
+                fallo.value = true
             } finally {
                 cargando.value = false
             }

@@ -14,5 +14,5 @@ class Servicios(context: Context) {
     private val api = Retrofit.Builder().baseUrl("https://programa.invalid/")
         .client(OkHttpClient.Builder().addInterceptor(mesa).build())
         .addConverterFactory(GsonConverterFactory.create()).build().create(ProgramaApi::class.java)
-    val agenda = AgendaRepository(api, archivo)
+    val agenda = AgendaRepository(api, archivo, context)
 }

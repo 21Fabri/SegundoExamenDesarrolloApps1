@@ -1,10 +1,16 @@
 package ar.jornadas.data
 
+import android.content.Context
 import androidx.room.withTransaction
 
-class AgendaRepository(private val api: ProgramaApi, private val base: Archivo) {
+class AgendaRepository(private val api: ProgramaApi, private val base: Archivo, contexto: Context) {
     private val dao = base.cartelera()
+    private val memoria = contexto.getSharedPreferences("agenda", Context.MODE_PRIVATE)
     val programa = dao.observar()
+
+    var huboDescarga: Boolean
+        get() = memoria.getBoolean("huboDescarga", false)
+        private set(value) { memoria.edit().putBoolean("huboDescarga", value).apply() }
 
     suspend fun sincronizar() {
         val fichas = api.consultar().map {
@@ -19,6 +25,7 @@ class AgendaRepository(private val api: ProgramaApi, private val base: Archivo) 
                 dao.guardar(fichas.map { it.copy(favorita = it.id in favoritas) })
             }
         }
+        huboDescarga = true
     }
 
     suspend fun cambiarFavorita(id: String) = dao.alternar(id)
