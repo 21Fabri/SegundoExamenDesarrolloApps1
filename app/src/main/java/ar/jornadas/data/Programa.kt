@@ -21,8 +21,17 @@ interface CarteleraDao {
     @Query("SELECT * FROM charlas ORDER BY dia, hora, sala")
     fun observar(): Flow<List<Charla>>
 
+    @Query("SELECT id FROM charlas WHERE favorita = 1")
+    suspend fun idsFavoritas(): List<String>
+
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun guardar(fichas: List<Charla>)
+
+    @Query("DELETE FROM charlas WHERE id NOT IN (:vigentes)")
+    suspend fun borrarAusentes(vigentes: List<String>)
+
+    @Query("DELETE FROM charlas")
+    suspend fun borrarTodas()
 
     @Query("UPDATE charlas SET favorita = NOT favorita WHERE id = :id")
     suspend fun alternar(id: String)
