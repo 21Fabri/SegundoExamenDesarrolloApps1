@@ -7,19 +7,27 @@ import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import java.io.IOException
 
-class ProgramaModel(app: Application) : AndroidViewModel(app) {
+class ProgramaModel(app: Application, private val estado: SavedStateHandle) : AndroidViewModel(app) {
     private val servicios = Servicios(app)
     val mesa = servicios.mesa
     private val repo = servicios.agenda
     val charlas = repo.programa.stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())
-    val dia = MutableStateFlow(0)
+    val dia = estado.getStateFlow("dia", 0)
+    val tema = estado.getStateFlow("tema", "Todos")
     val aviso = MutableStateFlow("")
     val cargando = MutableStateFlow(false)
 
+    init { recargar() }
+
+    fun elegirDia(valor: Int) { estado["dia"] = valor }
+
+    fun elegirTema(valor: String) { estado["tema"] = valor }
+
     fun recargar() {
+        if (cargando.value) return
+        cargando.value = true
+        aviso.value = ""
         viewModelScope.launch {
-            cargando.value = true
-            aviso.value = ""
             try {
                 repo.sincronizar()
             } catch (e: IOException) {

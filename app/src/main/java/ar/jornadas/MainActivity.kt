@@ -4,6 +4,7 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
+import ar.jornadas.lab.ServicioLocal
 import ar.jornadas.ui.*
 
 class MainActivity : ComponentActivity() {
@@ -11,14 +12,10 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         if (savedInstanceState == null && intent.hasExtra("servicio_disponible")) {
-            model.mesa.disponible = intent.getBooleanExtra("servicio_disponible", true)
+            ServicioLocal(applicationContext).disponible =
+                intent.getBooleanExtra("servicio_disponible", true)
             intent.removeExtra("servicio_disponible")
         }
         setContent { Portada(model) }
-    }
-
-    override fun onStart() {
-        super.onStart()
-        model.recargar()
     }
 }
